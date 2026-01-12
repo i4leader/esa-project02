@@ -58,11 +58,13 @@ export class HandTracking {
 
         this.handsSolution.onResults(this.onResults.bind(this));
 
-        // 初始化摄像头
+        console.log('HandTracking: Hands solution initialized');
+
+        // Initialize camera placeholder
         this.camera = null;
         this.isInitialized = false;
 
-        // 窗口大小调整监听
+        // Window resize listener
         window.addEventListener('resize', () => this.onWindowResize());
     }
 
@@ -78,11 +80,15 @@ export class HandTracking {
      * Initialize camera and start tracking
      */
     async initialize() {
+        console.log('HandTracking: initialize() called');
+
         try {
             // Check if we're on HTTPS or localhost (required for camera access)
             const isSecure = location.protocol === 'https:' ||
                 location.hostname === 'localhost' ||
                 location.hostname === '127.0.0.1';
+
+            console.log(`HandTracking: Secure Context Check: ${isSecure} (Protocol: ${location.protocol})`);
 
             if (!isSecure) {
                 console.warn('⚠️ Camera access typically requires HTTPS. If camera fails, try:');
@@ -92,9 +98,11 @@ export class HandTracking {
 
             // Check if getUserMedia is supported
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                console.error('getUserMedia is not supported in this browser');
+                console.error('HandTracking: getUserMedia is not supported in this browser');
                 throw new Error('NOT_SUPPORTED');
             }
+
+            console.log('HandTracking: Requesting camera access...');
 
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
@@ -104,12 +112,35 @@ export class HandTracking {
                 }
             });
 
+            console.log('HandTracking: Camera access granted, stream ID:', stream.id);
+
             this.videoElement.srcObject = stream;
+            // Ensure video plays (important for some mobile/safari scenarios)
+            this.videoElement.setAttribute('playsinline', 'true');
+
+            // Wait for video metadata to load to ensure dimensions are correct
+            await new Promise((resolve) => {
+                this.videoElement.onloadedmetadata = () => {
+                    console.log(`HandTracking: Video metadata loaded. Size: ${this.videoElement.videoWidth}x${this.videoElement.videoHeight}`);
+                    resolve();
+                };
+                // Timeout in case metadata never loads
+                setTimeout(resolve, 2000);
+            });
+
+            try {
+                await this.videoElement.play();
+                console.log('HandTracking: Video element playing');
+            } catch (e) {
+                console.warn('HandTracking: Video play() failed (might be handled by Camera utils):', e);
+            }
 
             // Set canvas dimensions
             this.canvasElement.width = this.canvasElement.clientWidth;
             this.canvasElement.height = this.canvasElement.clientHeight;
+            console.log(`HandTracking: Canvas dimensions set to ${this.canvasElement.width}x${this.canvasElement.height}`);
 
+            console.log('HandTracking: Initializing MediaPipe Camera utility...');
             this.camera = new Camera(this.videoElement, {
                 onFrame: async () => {
                     await this.handsSolution.send({ image: this.videoElement });
@@ -118,7 +149,10 @@ export class HandTracking {
                 height: 720
             });
 
-            this.camera.start();
+            console.log('HandTracking: Starting MediaPipe Camera...');
+            await this.camera.start();
+            console.log('HandTracking: MediaPipe Camera started successfully');
+
             this.isInitialized = true;
 
             return true;

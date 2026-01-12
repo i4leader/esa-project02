@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    // Force new hash on each build using timestamp
+    // Force new hash on each build using timestamp (Update: 2026-01-13 Debug Run 2)
     rollupOptions: {
       output: {
         entryFileNames: `assets/[name]-[hash]-${Date.now()}.js`,
