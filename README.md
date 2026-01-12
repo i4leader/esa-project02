@@ -10,6 +10,12 @@
 
 This is a gesture-controlled fruit cutting game developed using Three.js and Mediapipe. Players use webcam-captured hand gestures to slice flying fruits on screen and earn points while avoiding bombs. The project runs in modern browsers and is deployed on Alibaba Cloud ESA platform for high availability and elastic scaling.
 
+## 🎮 Demo
+
+<p align="center">
+  <img src="/public/demofail.gif" alt="Fruit Ninja Demo" width="600">
+</p>
+
 ## Features
 
 ### 1. Core Game Features
@@ -137,6 +143,12 @@ Issues and Pull Requests are welcome!
 
 这是一个使用 Three.js 和 Mediapipe 技术栈开发的基于摄像头手势交互的切水果游戏。玩家通过摄像头捕捉手势动作，在屏幕中切割飞出的水果以获得分数，同时避免切到炸弹。项目支持现代浏览器运行，并部署在阿里云 ESA 平台，确保高可用性和弹性扩展。
 
+## 🎮 游戏演示
+
+<p align="center">
+  <img src="/public/demofail.gif" alt="水果忍者演示" width="600">
+</p>
+
 ## 功能概述
 
 ### 1. 游戏核心功能
@@ -189,6 +201,9 @@ Issues and Pull Requests are welcome!
 
 #### 部署平台
 - 部署到阿里云 ESA（Elastic Serverless Application）平台，支持高可用性和弹性扩展
+
+本项目由阿里云ESA提供加速、计算和保护
+<img src="/public/aliyun.png">
 
 #### 浏览器支持
 - 支持现代主流浏览器（Chrome、Edge、Firefox、Safari）最新版本
@@ -338,3 +353,5 @@ npm run deploy
 ## 联系方式
 
 如有问题或建议，请通过 GitHub Issues 联系。
+
+⭐ 如果这个项目对你有帮助，请给个 Star 支持一下！
