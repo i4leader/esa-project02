@@ -83,17 +83,19 @@ export class HandTracking {
         console.log('HandTracking: initialize() called');
 
         try {
-            // Check if we're on HTTPS or localhost (required for camera access)
-            const isSecure = location.protocol === 'https:' ||
+            // Enhanced secure context check
+            const isSecure = window.isSecureContext || 
+                location.protocol === 'https:' ||
                 location.hostname === 'localhost' ||
                 location.hostname === '127.0.0.1';
 
-            console.log(`HandTracking: Secure Context Check: ${isSecure} (Protocol: ${location.protocol})`);
+            console.log(`HandTracking: Secure Context Check: ${isSecure} (Protocol: ${location.protocol}, Host: ${location.hostname})`);
 
+            // More specific error for production HTTPS requirement
             if (!isSecure) {
-                console.warn('⚠️ Camera access typically requires HTTPS. If camera fails, try:');
-                console.warn('Chrome: chrome://flags/#unsafely-treat-insecure-origin-as-secure');
-                console.warn('Add your site URL to the list and restart Chrome.');
+                const errorMsg = 'Camera access requires HTTPS in production. Please ensure your Aliyun ESA deployment uses HTTPS.';
+                console.error('HandTracking:', errorMsg);
+                throw new Error('HTTPS_REQUIRED');
             }
 
             // Check if getUserMedia is supported
@@ -104,13 +106,35 @@ export class HandTracking {
 
             console.log('HandTracking: Requesting camera access...');
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                    facingMode: 'user'
+            // Add debug information for Aliyun ESA
+            console.log('Debug info for Aliyun ESA:', {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                language: navigator.language,
+                mediaDevices: !!navigator.mediaDevices,
+                getUserMedia: !!navigator.mediaDevices?.getUserMedia,
+                secureContext: window.isSecureContext,
+                location: {
+                    protocol: location.protocol,
+                    hostname: location.hostname,
+                    port: location.port
                 }
             });
+
+            // Enhanced camera constraints with fallback options
+            const constraints = {
+                video: {
+                    width: { ideal: 1280, min: 640 },
+                    height: { ideal: 720, min: 480 },
+                    facingMode: 'user',
+                    frameRate: { ideal: 30, min: 15 }
+                }
+            };
+
+            console.log('Requesting camera with constraints:', constraints);
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
             console.log('HandTracking: Camera access granted, stream ID:', stream.id);
 
@@ -159,7 +183,33 @@ export class HandTracking {
         } catch (error) {
             console.error('Camera initialization failed:', error);
             this.isInitialized = false;
-            this.lastError = error.message || error.name || 'Unknown error';
+            
+            // Enhanced error reporting for production debugging
+            let errorMessage = 'Unknown error';
+            if (error.name === 'NotAllowedError') {
+                errorMessage = 'Camera access denied by user or browser policy';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage = 'No camera device found';
+            } else if (error.name === 'NotReadableError') {
+                errorMessage = 'Camera is already in use by another application';
+            } else if (error.name === 'OverconstrainedError') {
+                errorMessage = 'Camera constraints cannot be satisfied';
+            } else if (error.name === 'SecurityError') {
+                errorMessage = 'Security error - check HTTPS and permissions';
+            } else if (error.message === 'HTTPS_REQUIRED') {
+                errorMessage = 'HTTPS required for camera access';
+            } else {
+                errorMessage = error.message || error.name || 'Unknown camera error';
+            }
+            
+            console.error('Detailed error info:', {
+                name: error.name,
+                message: error.message,
+                constraint: error.constraint,
+                stack: error.stack
+            });
+            
+            this.lastError = errorMessage;
             return false;
         }
     }

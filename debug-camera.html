@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Debug - Aliyun ESA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        video {
+            width: 100%;
+            max-width: 400px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Camera Debug Tool - Aliyun ESA</h1>
+    
+    <div class="debug-section">
+        <h2>Environment Check</h2>
+        <div id="env-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Camera Test</h2>
+        <button onclick="testCamera()">Test Camera Access</button>
+        <button onclick="listDevices()">List Media Devices</button>
+        <div id="camera-status"></div>
+        <video id="test-video" autoplay playsinline style="display: none;"></video>
+    </div>
+
+    <div class="debug-section">
+        <h2>Debug Information</h2>
+        <pre id="debug-info"></pre>
+    </div>
+
+    <script>
+        // Check environment on load
+        window.addEventListener('load', checkEnvironment);
+
+        function checkEnvironment() {
+            const envStatus = document.getElementById('env-status');
+            const debugInfo = document.getElementById('debug-info');
+            
+            const info = {
+                url: window.location.href,
+                protocol: window.location.protocol,
+                hostname: window.location.hostname,
+                isSecureContext: window.isSecureContext,
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                mediaDevicesSupported: !!navigator.mediaDevices,
+                getUserMediaSupported: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+                timestamp: new Date().toISOString()
+            };
+
+            debugInfo.textContent = JSON.stringify(info, null, 2);
+
+            let status = '';
+            if (info.isSecureContext) {
+                status += '<div class="status success">✅ Secure Context (HTTPS)</div>';
+            } else {
+                status += '<div class="status error">❌ Not Secure Context</div>';
+            }
+
+            if (info.getUserMediaSupported) {
+                status += '<div class="status success">✅ getUserMedia API Supported</div>';
+            } else {
+                status += '<div class="status error">❌ getUserMedia API Not Supported</div>';
+            }
+
+            envStatus.innerHTML = status;
+        }
+
+        async function testCamera() {
+            const statusDiv = document.getElementById('camera-status');
+            const video = document.getElementById('test-video');
+            
+            statusDiv.innerHTML = '<div class="status warning">🔄 Testing camera access...</div>';
+
+            try {
+                console.log('Requesting camera access...');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 },
+                        facingMode: 'user'
+                    }
+                });
+
+                console.log('Camera access granted:', stream);
+                
+                video.srcObject = stream;
+                video.style.display = 'block';
+                
+                statusDiv.innerHTML = `
+                    <div class="status success">✅ Camera Access Successful!</div>
+                    <p>Stream ID: ${stream.id}</p>
+                    <p>Video tracks: ${stream.getVideoTracks().length}</p>
+                    <button onclick="stopCamera()">Stop Camera</button>
+                `;
+
+            } catch (error) {
+                console.error('Camera access failed:', error);
+                
+                let errorMsg = 'Unknown error';
+                let troubleshooting = '';
+
+                switch (error.name) {
+                    case 'NotAllowedError':
+                        errorMsg = 'Camera access denied by user or browser policy';
+                        troubleshooting = 'Please allow camera access and try again.';
+                        break;
+                    case 'NotFoundError':
+                        errorMsg = 'No camera device found';
+                        troubleshooting = 'Please ensure a camera is connected.';
+                        break;
+                    case 'NotReadableError':
+                        errorMsg = 'Camera is already in use';
+                        troubleshooting = 'Close other applications using the camera.';
+                        break;
+                    case 'OverconstrainedError':
+                        errorMsg = 'Camera constraints cannot be satisfied';
+                        troubleshooting = 'Try with different camera settings.';
+                        break;
+                    case 'SecurityError':
+                        errorMsg = 'Security error';
+                        troubleshooting = 'Check HTTPS and browser permissions.';
+                        break;
+                    default:
+                        errorMsg = error.message || error.name;
+                        troubleshooting = 'Check browser console for more details.';
+                }
+
+                statusDiv.innerHTML = `
+                    <div class="status error">❌ Camera Access Failed</div>
+                    <p><strong>Error:</strong> ${errorMsg}</p>
+                    <p><strong>Troubleshooting:</strong> ${troubleshooting}</p>
+                    <pre>${JSON.stringify({
+                        name: error.name,
+                        message: error.message,
+                        constraint: error.constraint
+                    }, null, 2)}</pre>
+                `;
+            }
+        }
+
+        async function listDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                console.log('Media devices:', devices);
+                
+                const statusDiv = document.getElementById('camera-status');
+                statusDiv.innerHTML += `
+                    <div class="status success">📹 Found ${videoDevices.length} camera device(s)</div>
+                    <pre>${JSON.stringify(videoDevices.map(d => ({
+                        deviceId: d.deviceId,
+                        label: d.label || 'Unknown Camera',
+                        kind: d.kind
+                    })), null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Failed to enumerate devices:', error);
+            }
+        }
+
+        function stopCamera() {
+            const video = document.getElementById('test-video');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                video.style.display = 'none';
+            }
+            document.getElementById('camera-status').innerHTML = '<div class="status warning">Camera stopped</div>';
+        }
+    </script>
+</body>
+</html>

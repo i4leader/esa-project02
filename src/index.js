@@ -101,19 +101,126 @@ class FruitCuttingGame {
             const errorMsg = this.handTracking.getLastError ? this.handTracking.getLastError() : 'Unknown';
             this.systemInfo.updateCameraStatus('Failed');
 
-            // Check if it's likely an HTTPS issue
-            const isSecure = location.protocol === 'https:' ||
-                location.hostname === 'localhost' ||
-                location.hostname === '127.0.0.1';
+            console.error('Camera initialization failed on Aliyun ESA:', errorMsg);
 
-            if (!isSecure) {
-                alert('Camera access failed. HTTP sites require special browser settings.\n\n' +
-                    'For Chrome, go to:\nchrome://flags/#unsafely-treat-insecure-origin-as-secure\n\n' +
-                    'Add this URL and restart Chrome:\n' + location.origin);
+            // Enhanced error handling for Aliyun ESA deployment
+            let userMessage = 'Unable to access camera. ';
+            
+            if (errorMsg.includes('denied')) {
+                userMessage += 'Please allow camera access when prompted and refresh the page.';
+            } else if (errorMsg.includes('NotFoundError')) {
+                userMessage += 'No camera device detected. Please ensure a camera is connected.';
+            } else if (errorMsg.includes('NotReadableError')) {
+                userMessage += 'Camera is being used by another application. Please close other apps using the camera.';
+            } else if (errorMsg.includes('HTTPS')) {
+                userMessage += 'This site requires HTTPS for camera access.';
             } else {
-                alert('Unable to access camera. Please check your permissions.\nError: ' + errorMsg);
+                userMessage += `Error: ${errorMsg}\n\nTroubleshooting:\n` +
+                    '1. Refresh the page and allow camera access\n' +
+                    '2. Check if camera is being used by other apps\n' +
+                    '3. Try a different browser (Chrome/Edge recommended)\n' +
+                    '4. Ensure camera permissions are enabled in browser settings';
             }
+
+            // Show user-friendly error message
+            this.showCameraError(userMessage);
         }
+    }
+
+    /**
+     * Show camera error message to user
+     */
+    showCameraError(message) {
+        // Create error overlay
+        const errorOverlay = document.createElement('div');
+        errorOverlay.id = 'camera-error-overlay';
+        errorOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        `;
+
+        errorOverlay.innerHTML = `
+            <div style="max-width: 600px;">
+                <h2 style="color: #FF5252; margin-bottom: 20px;">📷 Camera Access Required</h2>
+                <p style="font-size: 18px; line-height: 1.6; margin-bottom: 30px;">${message}</p>
+                <button id="retry-camera" style="
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    font-size: 16px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    margin-right: 10px;
+                ">Try Again</button>
+                <button id="close-error" style="
+                    background: #666;
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    font-size: 16px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                ">Continue Without Camera</button>
+            </div>
+        `;
+
+        document.body.appendChild(errorOverlay);
+
+        // Add event listeners
+        document.getElementById('retry-camera').addEventListener('click', () => {
+            document.body.removeChild(errorOverlay);
+            this.initializeCamera();
+        });
+
+        document.getElementById('close-error').addEventListener('click', () => {
+            document.body.removeChild(errorOverlay);
+            // Continue with game but show warning and enable fallback controls
+            this.systemInfo.updateCameraStatus('Mouse/Touch Mode');
+            this.setupFallbackControls();
+            
+            // Show instruction for fallback mode
+            setTimeout(() => {
+                const instruction = document.createElement('div');
+                instruction.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(76, 175, 80, 0.9);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    z-index: 999;
+                    text-align: center;
+                    font-size: 16px;
+                `;
+                instruction.innerHTML = `
+                    <p><strong>🖱️ Mouse/Touch Mode Enabled</strong></p>
+                    <p>Click and drag to slice fruits!</p>
+                `;
+                document.body.appendChild(instruction);
+                
+                setTimeout(() => {
+                    if (document.body.contains(instruction)) {
+                        document.body.removeChild(instruction);
+                    }
+                }, 3000);
+            }, 500);
+        });
     }
 
     /**
@@ -161,6 +268,76 @@ class FruitCuttingGame {
         if (this.gameState === 'gameover' || this.gameState === 'restarting') {
             this.checkRestartButtonInteraction(hands);
         }
+    }
+
+    /**
+     * Setup fallback mouse/touch controls when camera is not available
+     */
+    setupFallbackControls() {
+        let isMouseDown = false;
+        let mouseTrail = [];
+        const maxTrailLength = 25;
+
+        const addMousePoint = (x, y) => {
+            mouseTrail.push({ x, y, timestamp: Date.now() });
+            if (mouseTrail.length > maxTrailLength) {
+                mouseTrail.shift();
+            }
+
+            // Update cutting paths for game scene
+            if (mouseTrail.length >= 2) {
+                this.gameScene.updateCuttingPaths([{
+                    points: mouseTrail.map(p => ({ x: p.x, y: p.y })),
+                    hand: 'mouse'
+                }]);
+            }
+        };
+
+        const clearMouseTrail = () => {
+            mouseTrail = [];
+            this.gameScene.updateCuttingPaths([]);
+        };
+
+        // Mouse events
+        this.canvasElement.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            const rect = this.canvasElement.getBoundingClientRect();
+            addMousePoint(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        this.canvasElement.addEventListener('mousemove', (e) => {
+            if (isMouseDown) {
+                const rect = this.canvasElement.getBoundingClientRect();
+                addMousePoint(e.clientX - rect.left, e.clientY - rect.top);
+            }
+        });
+
+        this.canvasElement.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            setTimeout(clearMouseTrail, 300); // Clear trail after 300ms
+        });
+
+        // Touch events for mobile
+        this.canvasElement.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = this.canvasElement.getBoundingClientRect();
+            const touch = e.touches[0];
+            addMousePoint(touch.clientX - rect.left, touch.clientY - rect.top);
+        });
+
+        this.canvasElement.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const rect = this.canvasElement.getBoundingClientRect();
+            const touch = e.touches[0];
+            addMousePoint(touch.clientX - rect.left, touch.clientY - rect.top);
+        });
+
+        this.canvasElement.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            setTimeout(clearMouseTrail, 300);
+        });
+
+        console.log('Fallback mouse/touch controls enabled');
     }
 
     /**
