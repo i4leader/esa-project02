@@ -3,9 +3,11 @@ import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 import { HAND_CONNECTIONS } from '@mediapipe/hands';
 
+// Version: 2.0.0 - Camera fixes for ESA deployment (2026-01-13)
+
 /**
- * 手势识别组件
- * 使用 Mediapipe 实现实时手部追踪和手势识别
+ * Hand Tracking Component
+ * Real-time hand tracking using Mediapipe
  */
 export class HandTracking {
     constructor(videoElement, canvasElement, onHandsDetected) {
