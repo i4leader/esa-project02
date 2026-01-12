@@ -1,0 +1,30 @@
+{
+  "name": "esa-project02",
+  "version": "1.0.0",
+  "description": "基于摄像头手势交互的 Three.js + Mediapipe 水果切割游戏",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "echo '部署到阿里云 ESA 平台'"
+  },
+  "keywords": [
+    "three.js",
+    "mediapipe",
+    "手势识别",
+    "游戏",
+    "水果切割"
+  ],
+  "author": "Jack Tu",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.160.0",
+    "@mediapipe/hands": "^0.4.1675469240",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/drawing_utils": "^0.3.1675466124"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

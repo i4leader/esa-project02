@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水果切割游戏 - Three.js + Mediapipe</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 系统信息显示 -->
+        <div id="system-info" class="system-info">
+            <div class="info-item">
+                <span class="label">分辨率:</span>
+                <span id="resolution">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">帧率:</span>
+                <span id="fps">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">浏览器:</span>
+                <span id="browser">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">摄像头:</span>
+                <span id="camera-status">未连接</span>
+            </div>
+        </div>
+
+        <!-- 分数显示 -->
+        <div id="score-display" class="score-display">
+            <div class="score-label">分数</div>
+            <div id="score-value" class="score-value">0</div>
+            <div id="time-remaining" class="time-remaining">60</div>
+        </div>
+
+        <!-- 游戏画布容器 -->
+        <div id="game-container" class="game-container">
+            <canvas id="game-canvas"></canvas>
+            <canvas id="hand-canvas"></canvas>
+            <video id="video-input" autoplay playsinline style="display: none;"></video>
+        </div>
+
+        <!-- 开始界面 -->
+        <div id="start-screen" class="overlay-screen">
+            <div class="screen-content">
+                <h1 class="game-title">水果切割游戏</h1>
+                <p class="game-subtitle">将手放在开始按钮上 3 秒以开始游戏</p>
+                <div id="start-button" class="start-button">
+                    <div class="button-text">开始游戏</div>
+                    <div id="countdown" class="countdown"></div>
+                </div>
+                <div class="instructions">
+                    <h3>游戏说明</h3>
+                    <ul>
+                        <li>使用手势切割飞出的水果获得分数</li>
+                        <li>避免切割炸弹，否则会扣分</li>
+                        <li>按空格键暂停/继续游戏</li>
+                        <li>游戏时间：60 秒</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 暂停界面 -->
+        <div id="pause-screen" class="overlay-screen hidden">
+            <div class="screen-content">
+                <h2>游戏暂停</h2>
+                <p>按空格键继续游戏</p>
+            </div>
+        </div>
+
+        <!-- 结束界面 -->
+        <div id="game-over-screen" class="overlay-screen hidden">
+            <div class="screen-content">
+                <h2>游戏结束</h2>
+                <div class="final-score">
+                    <div class="score-label">最终分数</div>
+                    <div id="final-score-value" class="score-value">0</div>
+                </div>
+                <div id="restart-button" class="restart-button">
+                    <div class="button-text">重新开始</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 音效控制 -->
+        <div id="audio-control" class="audio-control">
+            <button id="music-toggle" class="audio-button">🔊</button>
+        </div>
+    </div>
+
+    <script type="module" src="/src/index.js"></script>
+</body>
+</html>

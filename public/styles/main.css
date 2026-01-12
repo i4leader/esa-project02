@@ -1,0 +1,289 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+}
+
+#app {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* 系统信息 */
+.system-info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    z-index: 100;
+    font-size: 14px;
+}
+
+.info-item {
+    margin: 5px 0;
+}
+
+.info-item .label {
+    color: #aaa;
+    margin-right: 10px;
+}
+
+/* 分数显示 */
+.score-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 100;
+    text-align: center;
+    min-width: 150px;
+}
+
+.score-label {
+    font-size: 16px;
+    color: #aaa;
+    margin-bottom: 10px;
+}
+
+.score-value {
+    font-size: 48px;
+    font-weight: bold;
+    color: #4CAF50;
+    margin: 10px 0;
+}
+
+.time-remaining {
+    font-size: 24px;
+    color: #FF9800;
+    margin-top: 10px;
+}
+
+/* 游戏容器 */
+.game-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 摄像头视频背景 */
+#video-input {
+    width: 100%;
+    height: 100%;
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    object-fit: cover;
+    transform: scaleX(-1);
+    /* 镜像翻转，更自然 */
+}
+
+/* 3D游戏画布 - 透明背景，显示在视频上方 */
+#game-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    background: transparent;
+    transform: scaleX(-1);
+    /* 与视频镜像一致 */
+}
+
+/* 手部轨迹画布 */
+#hand-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 10;
+    transform: scaleX(-1);
+    /* 与视频镜像一致 */
+}
+
+/* 覆盖层屏幕 */
+.overlay-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+
+.overlay-screen.hidden {
+    display: none;
+}
+
+.screen-content {
+    text-align: center;
+    padding: 40px;
+}
+
+.game-title {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #4CAF50;
+    text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+}
+
+.game-subtitle {
+    font-size: 18px;
+    margin-bottom: 40px;
+    color: #aaa;
+}
+
+/* 按钮样式 */
+.start-button,
+.restart-button {
+    position: relative;
+    width: 300px;
+    height: 100px;
+    margin: 30px auto;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.start-button:hover,
+.restart-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.start-button.active,
+.restart-button.active {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    box-shadow: 0 0 30px rgba(255, 152, 0, 0.8);
+}
+
+.button-text {
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.countdown {
+    position: absolute;
+    font-size: 36px;
+    font-weight: bold;
+    color: #fff;
+    z-index: 2;
+}
+
+/* 游戏说明 */
+.instructions {
+    margin-top: 40px;
+    text-align: left;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.instructions h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #4CAF50;
+}
+
+.instructions ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.instructions li {
+    font-size: 16px;
+    margin: 10px 0;
+    padding-left: 25px;
+    position: relative;
+    color: #ccc;
+}
+
+.instructions li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #4CAF50;
+    font-size: 20px;
+}
+
+/* 最终分数 */
+.final-score {
+    margin: 30px 0;
+}
+
+/* 音效控制 */
+.audio-control {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.audio-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #4CAF50;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.audio-button:hover {
+    background: rgba(76, 175, 80, 0.3);
+    transform: scale(1.1);
+}
+
+/* 手势轨迹可视化 */
+.hand-trail {
+    position: absolute;
+    pointer-events: none;
+    z-index: 50;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .game-title {
+        font-size: 32px;
+    }
+
+    .score-value {
+        font-size: 36px;
+    }
+
+    .system-info {
+        font-size: 12px;
+        padding: 10px;
+    }
+}

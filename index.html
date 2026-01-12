@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Ninja - Three.js + Mediapipe Hand Tracking</title>
+    <meta name="description"
+        content="A gesture-controlled fruit cutting game using webcam hand tracking. Cut fruits with your hands in AR!">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- System Info Display -->
+        <div id="system-info" class="system-info">
+            <div class="info-item">
+                <span class="label">Resolution:</span>
+                <span id="resolution">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">FPS:</span>
+                <span id="fps">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Browser:</span>
+                <span id="browser">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Camera:</span>
+                <span id="camera-status">Not Connected</span>
+            </div>
+        </div>
+
+        <!-- Score Display -->
+        <div id="score-display" class="score-display">
+            <div class="score-label">SCORE</div>
+            <div id="score-value" class="score-value">0</div>
+            <div id="time-remaining" class="time-remaining">60</div>
+        </div>
+
+        <!-- Game Canvas Container -->
+        <div id="game-container" class="game-container">
+            <canvas id="game-canvas"></canvas>
+            <canvas id="hand-canvas"></canvas>
+            <video id="video-input" autoplay playsinline></video>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="overlay-screen">
+            <div class="screen-content">
+                <h1 class="game-title">🍉 Fruit Ninja 🗡️</h1>
+                <p class="game-subtitle">Hold your hand over the Start button for 3 seconds to begin</p>
+                <div id="start-button" class="start-button">
+                    <div class="button-text">START GAME</div>
+                    <div id="countdown" class="countdown"></div>
+                </div>
+                <div class="instructions">
+                    <h3>How to Play</h3>
+                    <ul>
+                        <li>Use hand gestures to slice flying fruits and earn points</li>
+                        <li>Avoid slicing bombs - they will cost you points!</li>
+                        <li>Press SPACE to pause/resume the game</li>
+                        <li>Game duration: 60 seconds</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pause-screen" class="overlay-screen hidden">
+            <div class="screen-content">
+                <h2>⏸️ GAME PAUSED</h2>
+                <p>Press SPACE to continue</p>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="overlay-screen hidden">
+            <div class="screen-content">
+                <h2>🎮 GAME OVER</h2>
+                <div class="final-score">
+                    <div class="score-label">FINAL SCORE</div>
+                    <div id="final-score-value" class="score-value">0</div>
+                </div>
+                <div id="restart-button" class="restart-button">
+                    <div class="button-text">PLAY AGAIN</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Control -->
+        <div id="audio-control" class="audio-control">
+            <button id="music-toggle" class="audio-button">🔊</button>
+        </div>
+    </div>
+
+    <script type="module" src="/src/index.js"></script>
+</body>
+
+</html>
