@@ -61,6 +61,12 @@
     </div>
 
     <div class="debug-section">
+        <h2>MediaPipe Test</h2>
+        <button onclick="testMediaPipe()">Test MediaPipe Hands</button>
+        <div id="mediapipe-status"></div>
+    </div>
+
+    <div class="debug-section">
         <h2>Camera Test</h2>
         <button onclick="testCamera()">Test Camera Access</button>
         <button onclick="listDevices()">List Media Devices</button>
@@ -231,6 +237,30 @@
                 video.style.display = 'none';
             }
             document.getElementById('camera-status').innerHTML = '<div class="status warning">Camera stopped</div>';
+        }
+
+        async function testMediaPipe() {
+            const statusDiv = document.getElementById('mediapipe-status');
+            statusDiv.innerHTML = '<div class="status warning">🔄 Testing MediaPipe...</div>';
+
+            try {
+                // Test if MediaPipe can be loaded
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
+                
+                script.onload = () => {
+                    statusDiv.innerHTML = '<div class="status success">✅ MediaPipe Hands loaded successfully</div>';
+                };
+                
+                script.onerror = () => {
+                    statusDiv.innerHTML = '<div class="status error">❌ Failed to load MediaPipe Hands from CDN</div>';
+                };
+                
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ MediaPipe test failed: ${error.message}</div>`;
+            }
         }
     </script>
 </body>
