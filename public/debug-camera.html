@@ -61,6 +61,12 @@
     </div>
 
     <div class="debug-section">
+        <h2>Production vs Local Comparison</h2>
+        <button onclick="testFullGameFlow()">Test Full Game Initialization</button>
+        <div id="game-flow-status"></div>
+    </div>
+
+    <div class="debug-section">
         <h2>MediaPipe Test</h2>
         <button onclick="testMediaPipe()">Test MediaPipe Hands</button>
         <div id="mediapipe-status"></div>
@@ -260,6 +266,98 @@
                 
             } catch (error) {
                 statusDiv.innerHTML = `<div class="status error">❌ MediaPipe test failed: ${error.message}</div>`;
+            }
+        }
+
+        async function testFullGameFlow() {
+            const statusDiv = document.getElementById('game-flow-status');
+            statusDiv.innerHTML = '<div class="status warning">🔄 Testing full game initialization flow...</div>';
+
+            let results = [];
+
+            try {
+                // Step 1: Test camera access (same as main game)
+                results.push('📹 Testing camera access...');
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 },
+                        facingMode: 'user',
+                        frameRate: { ideal: 30, min: 15 }
+                    }
+                });
+                results.push('✅ Camera access: SUCCESS');
+
+                // Step 2: Test video element setup
+                results.push('📺 Testing video element setup...');
+                const testVideo = document.createElement('video');
+                testVideo.srcObject = stream;
+                testVideo.setAttribute('playsinline', 'true');
+                
+                await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => reject(new Error('Video metadata timeout')), 5000);
+                    testVideo.onloadedmetadata = () => {
+                        clearTimeout(timeout);
+                        resolve();
+                    };
+                });
+                results.push('✅ Video metadata: SUCCESS');
+
+                await testVideo.play();
+                results.push('✅ Video play: SUCCESS');
+
+                // Step 3: Test MediaPipe dependencies
+                results.push('🧠 Testing MediaPipe dependencies...');
+                
+                // Test if MediaPipe scripts can be loaded
+                const testMediaPipeLoad = () => {
+                    return new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
+                        script.onload = () => resolve('MediaPipe Hands loaded');
+                        script.onerror = () => reject(new Error('MediaPipe Hands failed to load'));
+                        document.head.appendChild(script);
+                        
+                        setTimeout(() => reject(new Error('MediaPipe load timeout')), 10000);
+                    });
+                };
+
+                try {
+                    await testMediaPipeLoad();
+                    results.push('✅ MediaPipe Hands: SUCCESS');
+                } catch (mpError) {
+                    results.push(`❌ MediaPipe Hands: ${mpError.message}`);
+                }
+
+                // Step 4: Test Camera utility
+                results.push('📷 Testing Camera utility...');
+                try {
+                    // This will fail if Camera class is not available
+                    if (typeof Camera !== 'undefined') {
+                        results.push('✅ Camera utility: Available');
+                    } else {
+                        results.push('❌ Camera utility: Not available (MediaPipe not loaded)');
+                    }
+                } catch (cameraError) {
+                    results.push(`❌ Camera utility: ${cameraError.message}`);
+                }
+
+                // Clean up
+                stream.getTracks().forEach(track => track.stop());
+
+                // Display results
+                statusDiv.innerHTML = `
+                    <div class="status success">🔍 Full Game Flow Test Complete</div>
+                    <pre style="text-align: left; margin-top: 10px;">${results.join('\n')}</pre>
+                `;
+
+            } catch (error) {
+                results.push(`❌ FAILED: ${error.message}`);
+                statusDiv.innerHTML = `
+                    <div class="status error">❌ Full Game Flow Test Failed</div>
+                    <pre style="text-align: left; margin-top: 10px;">${results.join('\n')}</pre>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
             }
         }
     </script>

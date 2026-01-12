@@ -93,12 +93,22 @@ class FruitCuttingGame {
      * Initialize camera
      */
     async initializeCamera() {
-        const success = await this.handTracking.initialize();
+        console.log('🎮 FruitCuttingGame: Starting camera initialization...');
+        
+        try {
+            const success = await this.handTracking.initialize();
+            console.log('🎮 FruitCuttingGame: HandTracking.initialize() returned:', success);
 
-        if (success) {
-            this.systemInfo.updateCameraStatus('Connected');
-        } else {
-            const errorMsg = this.handTracking.getLastError ? this.handTracking.getLastError() : 'Unknown';
+            if (success) {
+                this.systemInfo.updateCameraStatus('Connected');
+                console.log('🎮 FruitCuttingGame: Camera initialization SUCCESS');
+            } else {
+                throw new Error('HandTracking initialization returned false');
+            }
+        } catch (initError) {
+            console.error('🎮 FruitCuttingGame: Camera initialization FAILED:', initError);
+            
+            const errorMsg = this.handTracking.getLastError ? this.handTracking.getLastError() : initError.message;
             this.systemInfo.updateCameraStatus('Failed');
 
             console.error('Camera initialization failed on Aliyun ESA:', errorMsg);
@@ -126,12 +136,17 @@ class FruitCuttingGame {
                 userMessage += 'Camera is being used by another application. Please close other apps using the camera.';
             } else if (errorMsg.includes('HTTPS')) {
                 userMessage += 'This site requires HTTPS for camera access.';
+            } else if (errorMsg.includes('MediaPipe')) {
+                userMessage += `MediaPipe initialization failed. This might be a CDN or network issue.\n\n` +
+                    'The game will work with mouse/touch controls instead.';
             } else {
-                userMessage += `Error: ${errorMsg}\n\nTroubleshooting:\n` +
+                userMessage += `Error: ${errorMsg}\n\n` +
+                    'Troubleshooting:\n' +
                     '1. Refresh the page and allow camera access\n' +
                     '2. Check if camera is being used by other apps\n' +
                     '3. Try a different browser (Chrome/Edge recommended)\n' +
-                    '4. Ensure camera permissions are enabled in browser settings';
+                    '4. Check browser console for detailed error logs\n' +
+                    '5. Use the Debug Camera tool for more information';
             }
 
             // Show user-friendly error message

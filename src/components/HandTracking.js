@@ -42,7 +42,8 @@ export class HandTracking {
         // 轨迹保留时间（毫秒）
         this.trailRetentionTime = 350;
 
-        // Initialize MediaPipe Hands
+        console.log('HandTracking: Initializing MediaPipe Hands...');
+        
         this.handsSolution = new Hands({
             locateFile: (file) => {
                 // Try multiple CDN sources for better reliability
@@ -72,6 +73,39 @@ export class HandTracking {
 
         // Window resize listener
         window.addEventListener('resize', () => this.onWindowResize());
+    }
+
+    /**
+     * Pre-load MediaPipe dependencies to avoid production loading issues
+     */
+    async preloadMediaPipeDependencies() {
+        console.log('HandTracking: Pre-loading MediaPipe dependencies...');
+        
+        return new Promise((resolve) => {
+            // Set a reasonable timeout for production environments
+            const timeout = setTimeout(() => {
+                console.warn('HandTracking: MediaPipe pre-load timeout, continuing anyway...');
+                resolve();
+            }, 5000);
+
+            // Try to load the main MediaPipe script
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
+            
+            script.onload = () => {
+                console.log('HandTracking: MediaPipe hands.js pre-loaded successfully');
+                clearTimeout(timeout);
+                resolve();
+            };
+            
+            script.onerror = () => {
+                console.warn('HandTracking: MediaPipe hands.js pre-load failed, will try during initialization');
+                clearTimeout(timeout);
+                resolve(); // Continue anyway
+            };
+            
+            document.head.appendChild(script);
+        });
     }
 
     /**
@@ -178,6 +212,10 @@ export class HandTracking {
                 this.isInitialized = true;
                 return true;
             }
+
+            // Pre-load MediaPipe dependencies for production
+            console.log('HandTracking: Pre-loading MediaPipe dependencies...');
+            await this.preloadMediaPipeDependencies();
 
             console.log('HandTracking: Initializing MediaPipe Camera utility...');
             
