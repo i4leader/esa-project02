@@ -30,6 +30,17 @@
             <div class="info-item">
                 <span class="label">Camera:</span>
                 <span id="camera-status">Not Connected</span>
+                <button id="test-camera-btn" style="
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 2px 8px;
+                    font-size: 10px;
+                    border-radius: 3px;
+                    cursor: pointer;
+                    margin-left: 5px;
+                    display: none;
+                " onclick="testCameraQuick()">Test</button>
             </div>
         </div>
 
@@ -93,6 +104,22 @@
         <!-- Audio Control -->
         <div id="audio-control" class="audio-control">
             <button id="music-toggle" class="audio-button">🔊</button>
+        </div>
+
+        <!-- Debug Link (only show when camera fails) -->
+        <div id="debug-link" class="debug-link" style="display: none;">
+            <a href="/debug-camera.html" target="_blank" style="
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: rgba(255, 152, 0, 0.9);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-size: 14px;
+                z-index: 100;
+            ">🔍 Debug Camera Issues</a>
         </div>
     </div>
 

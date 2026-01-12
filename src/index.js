@@ -103,6 +103,18 @@ class FruitCuttingGame {
 
             console.error('Camera initialization failed on Aliyun ESA:', errorMsg);
 
+            // Show debug link
+            const debugLink = document.getElementById('debug-link');
+            if (debugLink) {
+                debugLink.style.display = 'block';
+            }
+
+            // Show quick test button
+            const testBtn = document.getElementById('test-camera-btn');
+            if (testBtn) {
+                testBtn.style.display = 'inline-block';
+            }
+
             // Enhanced error handling for Aliyun ESA deployment
             let userMessage = 'Unable to access camera. ';
             
@@ -175,6 +187,16 @@ class FruitCuttingGame {
                     border-radius: 5px;
                     cursor: pointer;
                 ">Continue Without Camera</button>
+                <button onclick="window.open('/debug-camera.html', '_blank')" style="
+                    background: #FF9800;
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    font-size: 16px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    margin-left: 10px;
+                ">🔍 Debug Camera</button>
             </div>
         `;
 
@@ -633,3 +655,36 @@ window.addEventListener('DOMContentLoaded', () => {
         `;
     }
 });
+
+// Quick camera test function (global)
+window.testCameraQuick = async function() {
+    const statusEl = document.getElementById('camera-status');
+    const testBtn = document.getElementById('test-camera-btn');
+    
+    statusEl.textContent = 'Testing...';
+    testBtn.disabled = true;
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user' }
+        });
+        
+        statusEl.textContent = 'Test OK';
+        statusEl.style.color = '#4CAF50';
+        
+        // Stop the test stream
+        stream.getTracks().forEach(track => track.stop());
+        
+        setTimeout(() => {
+            statusEl.textContent = 'Failed';
+            statusEl.style.color = '#FF5252';
+            testBtn.disabled = false;
+        }, 2000);
+        
+    } catch (error) {
+        statusEl.textContent = `Test Failed: ${error.name}`;
+        statusEl.style.color = '#FF5252';
+        testBtn.disabled = false;
+        console.error('Quick camera test failed:', error);
+    }
+};
