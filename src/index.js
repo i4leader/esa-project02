@@ -98,8 +98,21 @@ class FruitCuttingGame {
         if (success) {
             this.systemInfo.updateCameraStatus('Connected');
         } else {
+            const errorMsg = this.handTracking.getLastError ? this.handTracking.getLastError() : 'Unknown';
             this.systemInfo.updateCameraStatus('Failed');
-            alert('Unable to access camera. Please check your permissions.');
+
+            // Check if it's likely an HTTPS issue
+            const isSecure = location.protocol === 'https:' ||
+                location.hostname === 'localhost' ||
+                location.hostname === '127.0.0.1';
+
+            if (!isSecure) {
+                alert('Camera access failed. HTTP sites require special browser settings.\n\n' +
+                    'For Chrome, go to:\nchrome://flags/#unsafely-treat-insecure-origin-as-secure\n\n' +
+                    'Add this URL and restart Chrome:\n' + location.origin);
+            } else {
+                alert('Unable to access camera. Please check your permissions.\nError: ' + errorMsg);
+            }
         }
     }
 

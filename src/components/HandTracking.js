@@ -73,10 +73,27 @@ export class HandTracking {
     }
 
     /**
-     * 初始化摄像头并开始追踪
+     * Initialize camera and start tracking
      */
     async initialize() {
         try {
+            // Check if we're on HTTPS or localhost (required for camera access)
+            const isSecure = location.protocol === 'https:' ||
+                location.hostname === 'localhost' ||
+                location.hostname === '127.0.0.1';
+
+            if (!isSecure) {
+                console.warn('⚠️ Camera access typically requires HTTPS. If camera fails, try:');
+                console.warn('Chrome: chrome://flags/#unsafely-treat-insecure-origin-as-secure');
+                console.warn('Add your site URL to the list and restart Chrome.');
+            }
+
+            // Check if getUserMedia is supported
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.error('getUserMedia is not supported in this browser');
+                throw new Error('NOT_SUPPORTED');
+            }
+
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     width: { ideal: 1280 },
@@ -87,7 +104,7 @@ export class HandTracking {
 
             this.videoElement.srcObject = stream;
 
-            // 设置 canvas 尺寸
+            // Set canvas dimensions
             this.canvasElement.width = this.canvasElement.clientWidth;
             this.canvasElement.height = this.canvasElement.clientHeight;
 
@@ -104,10 +121,18 @@ export class HandTracking {
 
             return true;
         } catch (error) {
-            console.error('摄像头初始化失败:', error);
+            console.error('Camera initialization failed:', error);
             this.isInitialized = false;
+            this.lastError = error.message || error.name || 'Unknown error';
             return false;
         }
+    }
+
+    /**
+     * Get the last error message
+     */
+    getLastError() {
+        return this.lastError;
     }
 
     /**
