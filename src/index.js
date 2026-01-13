@@ -58,6 +58,82 @@ class FruitCuttingGame {
     }
 
     /**
+     * 调整摄像头亮度
+     */
+    adjustCameraBrightness() {
+        if (!this.videoElement) return;
+        
+        // 循环调整亮度级别：正常 -> 亮 -> 很亮 -> 超亮 -> 正常
+        const currentFilter = this.videoElement.style.filter || '';
+        let newFilter = '';
+        let level = '';
+        
+        if (currentFilter.includes('brightness(1.6)')) {
+            // 超亮 -> 正常
+            newFilter = 'brightness(1.0) contrast(1.0) saturate(1.0)';
+            level = '正常';
+        } else if (currentFilter.includes('brightness(1.4)')) {
+            // 很亮 -> 超亮
+            newFilter = 'brightness(1.6) contrast(1.3) saturate(1.2)';
+            level = '超亮';
+        } else if (currentFilter.includes('brightness(1.2)')) {
+            // 亮 -> 很亮
+            newFilter = 'brightness(1.4) contrast(1.2) saturate(1.1)';
+            level = '很亮';
+        } else {
+            // 正常 -> 亮
+            newFilter = 'brightness(1.2) contrast(1.1) saturate(1.05)';
+            level = '亮';
+        }
+        
+        this.videoElement.style.filter = newFilter;
+        console.log(`🔆 摄像头亮度调整为: ${level}`);
+        
+        // 显示提示
+        this.showBrightnessHint(level);
+    }
+
+    /**
+     * 显示亮度调整提示
+     */
+    showBrightnessHint(level) {
+        // 移除现有提示
+        const existingHint = document.getElementById('brightness-hint');
+        if (existingHint) {
+            existingHint.remove();
+        }
+        
+        // 创建新提示
+        const hint = document.createElement('div');
+        hint.id = 'brightness-hint';
+        hint.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #CCFF00;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 1001;
+            border: 2px solid #CCFF00;
+            text-align: center;
+        `;
+        hint.innerHTML = `🔆 摄像头亮度: ${level}<br><small>按B键继续调整</small>`;
+        
+        document.body.appendChild(hint);
+        
+        // 3秒后自动消失
+        setTimeout(() => {
+            if (document.body.contains(hint)) {
+                document.body.removeChild(hint);
+            }
+        }, 3000);
+    }
+
+    /**
      * 初始化游戏
      */
     async init() {
@@ -297,6 +373,12 @@ class FruitCuttingGame {
                 e.preventDefault();
                 const debugMode = this.trailRenderer.toggleDebugMode();
                 console.log('🔍 Debug mode:', debugMode ? 'ON - 显示手势位置圆圈' : 'OFF');
+            }
+            
+            // B键调整摄像头亮度
+            if (e.code === 'KeyB') {
+                e.preventDefault();
+                this.adjustCameraBrightness();
             }
         });
 
