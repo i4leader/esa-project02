@@ -13,28 +13,28 @@ const DEVICE_CAPABILITY = {
 // Performance presets for different device capabilities
 const PERFORMANCE_PRESETS = {
     [DEVICE_CAPABILITY.LOW]: {
-        gestureDetectionFps: 20,
+        gestureDetectionFps: 30, // 提高低端设备检测频率，从20提升到30
         particleCount: 15,
         targetFps: 30,
         enablePostProcessing: false,
         fruitSpawnRate: 0.3,
-        maxTrailLength: 10 // 低端设备更短的拖影
+        maxTrailLength: 15 // 低端设备适中的拖影
     },
     [DEVICE_CAPABILITY.MEDIUM]: {
-        gestureDetectionFps: 30,
+        gestureDetectionFps: 45, // 提高中端设备检测频率，从30提升到45
         particleCount: 25,
         targetFps: 60,
         enablePostProcessing: true,
         fruitSpawnRate: 0.4,
-        maxTrailLength: 15 // 中端设备适中的拖影
+        maxTrailLength: 20 // 中端设备更长的拖影
     },
     [DEVICE_CAPABILITY.HIGH]: {
-        gestureDetectionFps: 60,
+        gestureDetectionFps: 60, // 保持高端设备60fps检测
         particleCount: 30,
         targetFps: 60,
         enablePostProcessing: true,
         fruitSpawnRate: 0.5,
-        maxTrailLength: 15 // 高端设备也使用较短拖影，确保精确切割
+        maxTrailLength: 25 // 高端设备最长拖影，确保高成功率
     }
 };
 

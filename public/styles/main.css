@@ -90,8 +90,8 @@ body {
     object-fit: cover;
     transform: scaleX(-1);
     /* 镜像翻转，更自然 */
-    /* 调整亮度和对比度，让手部更清晰可见 */
-    filter: brightness(1.4) contrast(1.2) saturate(1.1);
+    /* 默认使用最亮设置，让手部清晰可见 */
+    filter: brightness(1.6) contrast(1.3) saturate(1.2);
 }
 
 /* 3D游戏画布 - 透明背景，显示在视频上方 */
@@ -136,9 +136,9 @@ body {
     z-index: 200;
 }
 
-/* 当显示开始屏幕时，让摄像头更亮 */
+/* 当显示开始屏幕时，保持最亮设置 */
 .overlay-screen:not(.hidden) ~ .game-container #video-input {
-    filter: brightness(1.6) contrast(1.3) saturate(1.2); /* 进一步增强亮度 */
+    filter: brightness(1.7) contrast(1.4) saturate(1.3); /* 开始屏幕时更亮 */
 }
 
 .overlay-screen.hidden {

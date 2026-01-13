@@ -9,7 +9,7 @@ export class ModernHandTracker {
         this.handLandmarker = null;
         this.isInitialized = false;
         this.lastError = null;
-        this.detectionIntervalMs = 33; // ~30fps default
+        this.detectionIntervalMs = 16; // 提高到~60fps检测，原来是33ms(30fps)
         this.lastDetectionTime = 0;
         
         // Hand tracking results
@@ -24,8 +24,15 @@ export class ModernHandTracker {
             right: []
         };
         
-        this.maxTrailLength = 13; // 减少拖影长度，从25减少到15
-        this.trailRetentionTime = 230; // 大幅缩短拖影时间到150ms，避免拖影误切水果
+        // 手势预测和平滑
+        this.handHistory = {
+            left: [],
+            right: []
+        };
+        this.historyLength = 3; // 保存最近3帧用于平滑
+        
+        this.maxTrailLength = 20; // 增加拖影长度，提高切割成功率
+        this.trailRetentionTime = 250; // 适当增加拖影时间，平衡精确度和成功率
     }
 
     /**
@@ -54,9 +61,9 @@ export class ModernHandTracker {
                 },
                 runningMode: "VIDEO",
                 numHands: 2,
-                minHandDetectionConfidence: 0.5,
-                minHandPresenceConfidence: 0.5,
-                minTrackingConfidence: 0.5
+                minHandDetectionConfidence: 0.3, // 降低从0.5到0.3，提高检测敏感度
+                minHandPresenceConfidence: 0.3,  // 降低从0.5到0.3，提高检测敏感度
+                minTrackingConfidence: 0.3       // 降低从0.5到0.3，提高跟踪敏感度
             });
 
             // Setup camera
@@ -168,23 +175,32 @@ export class ModernHandTracker {
             const handLabel = handedness[0].categoryName.toLowerCase();
             const confidence = handedness[0].score;
 
-            // Get key points for cutting (index and middle finger tips)
+            // Get key points for cutting - 使用多个手指位置提高检测精度
             const indexFinger = landmarks[8];  // Index finger tip
             const middleFinger = landmarks[12]; // Middle finger tip
+            const ringFinger = landmarks[16];   // Ring finger tip
             const wrist = landmarks[0];         // Wrist
 
-            // Calculate cutting position (midpoint of index and middle finger)
+            // Calculate cutting position - 使用三个手指的平均位置，更稳定和敏感
             const cuttingPosition = {
-                x: (indexFinger.x + middleFinger.x) / 2,
-                y: (indexFinger.y + middleFinger.y) / 2,
-                z: (indexFinger.z + middleFinger.z) / 2
+                x: (indexFinger.x + middleFinger.x + ringFinger.x) / 3,
+                y: (indexFinger.y + middleFinger.y + ringFinger.y) / 3,
+                z: (indexFinger.z + middleFinger.z + ringFinger.z) / 3
             };
 
             // Convert to screen coordinates
             // 注意：使用clientWidth/clientHeight而不是width/height，避免devicePixelRatio影响
             const canvas = document.getElementById('hand-canvas');
-            const screenX = cuttingPosition.x * canvas.clientWidth;
-            const screenY = cuttingPosition.y * canvas.clientHeight;
+            let screenX = cuttingPosition.x * canvas.clientWidth;
+            let screenY = cuttingPosition.y * canvas.clientHeight;
+
+            // 手势平滑处理，减少抖动，提高识别稳定性
+            const smoothedPosition = this.smoothHandPosition(
+                { x: screenX, y: screenY }, 
+                handLabel
+            );
+            screenX = smoothedPosition.x;
+            screenY = smoothedPosition.y;
 
             const handData = {
                 landmarks: landmarks,
@@ -208,6 +224,43 @@ export class ModernHandTracker {
         });
 
         this.updateTrails();
+    }
+
+    /**
+     * 手势位置平滑处理，减少抖动
+     */
+    smoothHandPosition(currentPos, handLabel) {
+        const history = this.handHistory[handLabel];
+        
+        // 添加当前位置到历史记录
+        history.push(currentPos);
+        
+        // 保持历史记录长度
+        if (history.length > this.historyLength) {
+            history.shift();
+        }
+        
+        // 如果历史记录不足，直接返回当前位置
+        if (history.length < 2) {
+            return currentPos;
+        }
+        
+        // 计算加权平均，最新的位置权重更大
+        let totalWeight = 0;
+        let smoothedX = 0;
+        let smoothedY = 0;
+        
+        for (let i = 0; i < history.length; i++) {
+            const weight = (i + 1) / history.length; // 权重递增
+            smoothedX += history[i].x * weight;
+            smoothedY += history[i].y * weight;
+            totalWeight += weight;
+        }
+        
+        return {
+            x: smoothedX / totalWeight,
+            y: smoothedY / totalWeight
+        };
     }
 
     /**

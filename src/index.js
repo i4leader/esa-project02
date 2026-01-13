@@ -63,27 +63,27 @@ class FruitCuttingGame {
     adjustCameraBrightness() {
         if (!this.videoElement) return;
         
-        // 循环调整亮度级别：正常 -> 亮 -> 很亮 -> 超亮 -> 正常
+        // 循环调整亮度级别：超亮(默认) -> 很亮 -> 亮 -> 正常 -> 超亮
         const currentFilter = this.videoElement.style.filter || '';
         let newFilter = '';
         let level = '';
         
         if (currentFilter.includes('brightness(1.6)')) {
-            // 超亮 -> 正常
-            newFilter = 'brightness(1.0) contrast(1.0) saturate(1.0)';
-            level = '正常';
-        } else if (currentFilter.includes('brightness(1.4)')) {
-            // 很亮 -> 超亮
-            newFilter = 'brightness(1.6) contrast(1.3) saturate(1.2)';
-            level = '超亮';
-        } else if (currentFilter.includes('brightness(1.2)')) {
-            // 亮 -> 很亮
+            // 超亮 -> 很亮
             newFilter = 'brightness(1.4) contrast(1.2) saturate(1.1)';
             level = '很亮';
-        } else {
-            // 正常 -> 亮
+        } else if (currentFilter.includes('brightness(1.4)')) {
+            // 很亮 -> 亮
             newFilter = 'brightness(1.2) contrast(1.1) saturate(1.05)';
             level = '亮';
+        } else if (currentFilter.includes('brightness(1.2)')) {
+            // 亮 -> 正常
+            newFilter = 'brightness(1.0) contrast(1.0) saturate(1.0)';
+            level = '正常';
+        } else {
+            // 正常 -> 超亮(默认)
+            newFilter = 'brightness(1.6) contrast(1.3) saturate(1.2)';
+            level = '超亮(默认)';
         }
         
         this.videoElement.style.filter = newFilter;

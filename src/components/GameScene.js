@@ -469,12 +469,12 @@ export class GameScene {
 
     /**
      * 检查点是否在切割路径上
-     * 优化：只检测最近的手势位置，避免拖影误切
+     * 优化：提高检测灵敏度，增加检测范围
      */
     isPointOnPath(point, paths) {
         for (const path of paths) {
-            // 只检测路径的最后几个点（最近的手势位置），而不是整个拖影
-            const recentPointsCount = Math.min(5, path.points.length); // 只检测最近5个点
+            // 检测更多的路径点，提高成功率
+            const recentPointsCount = Math.min(8, path.points.length); // 从5增加到8个点
             const startIndex = Math.max(0, path.points.length - recentPointsCount);
             
             for (let i = startIndex; i < path.points.length - 1; i++) {
@@ -487,8 +487,8 @@ export class GameScene {
                     p2
                 );
 
-                // 缩小检测阈值，让切割更精确
-                if (distance < 20) { // 从30减少到20像素
+                // 增大检测阈值，提高切割成功率
+                if (distance < 25) { // 从20增加到25像素
                     return true;
                 }
             }
