@@ -181,9 +181,10 @@ export class ModernHandTracker {
             };
 
             // Convert to screen coordinates
+            // 注意：使用clientWidth/clientHeight而不是width/height，避免devicePixelRatio影响
             const canvas = document.getElementById('hand-canvas');
-            const screenX = cuttingPosition.x * canvas.width;
-            const screenY = cuttingPosition.y * canvas.height;
+            const screenX = cuttingPosition.x * canvas.clientWidth;
+            const screenY = cuttingPosition.y * canvas.clientHeight;
 
             const handData = {
                 landmarks: landmarks,
@@ -193,8 +194,8 @@ export class ModernHandTracker {
                     z: cuttingPosition.z
                 },
                 wrist: {
-                    x: wrist.x * canvas.width,
-                    y: wrist.y * canvas.height
+                    x: wrist.x * canvas.clientWidth,
+                    y: wrist.y * canvas.clientHeight
                 },
                 confidence: confidence
             };

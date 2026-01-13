@@ -291,6 +291,13 @@ class FruitCuttingGame {
                 e.preventDefault();
                 this.performanceMonitor.toggle();
             }
+            
+            // D键切换调试模式（显示手势位置）
+            if (e.code === 'KeyD') {
+                e.preventDefault();
+                const debugMode = this.trailRenderer.toggleDebugMode();
+                console.log('🔍 Debug mode:', debugMode ? 'ON - 显示手势位置圆圈' : 'OFF');
+            }
         });
 
         // 音乐切换按钮

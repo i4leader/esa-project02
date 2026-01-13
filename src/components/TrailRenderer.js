@@ -19,6 +19,9 @@ export class TrailRenderer {
             mouse: '#FF1493'   // Hot Pink
         };
         
+        // Debug mode for position alignment
+        this.debugMode = false;
+        
         this.setupCanvas();
     }
     
@@ -72,6 +75,61 @@ export class TrailRenderer {
         if (trails.right && trails.right.length > 1) {
             this.drawTrail(trails.right, this.colors.right, 'right');
         }
+        
+        // Debug mode: draw current hand positions as circles
+        if (this.debugMode) {
+            this.drawDebugPositions(trails);
+        }
+    }
+    
+    /**
+     * Draw debug circles at current hand positions
+     */
+    drawDebugPositions(trails) {
+        this.ctx.save();
+        
+        // Draw current positions as circles
+        ['left', 'right'].forEach(hand => {
+            const trail = trails[hand];
+            if (trail && trail.length > 0) {
+                const currentPos = trail[trail.length - 1];
+                const color = this.colors[hand];
+                
+                // Draw a bright circle at current position
+                this.ctx.strokeStyle = color;
+                this.ctx.fillStyle = color;
+                this.ctx.lineWidth = 3;
+                this.ctx.globalAlpha = 0.8;
+                
+                this.ctx.beginPath();
+                this.ctx.arc(currentPos.x, currentPos.y, 15, 0, 2 * Math.PI);
+                this.ctx.stroke();
+                
+                this.ctx.globalAlpha = 0.3;
+                this.ctx.fill();
+                
+                // Draw position text
+                this.ctx.globalAlpha = 1.0;
+                this.ctx.fillStyle = '#FFFFFF';
+                this.ctx.font = '12px monospace';
+                this.ctx.fillText(
+                    `${hand}: ${Math.round(currentPos.x)},${Math.round(currentPos.y)}`,
+                    currentPos.x + 20,
+                    currentPos.y - 20
+                );
+            }
+        });
+        
+        this.ctx.restore();
+    }
+    
+    /**
+     * Toggle debug mode
+     */
+    toggleDebugMode() {
+        this.debugMode = !this.debugMode;
+        console.log('TrailRenderer debug mode:', this.debugMode ? 'ON' : 'OFF');
+        return this.debugMode;
     }
     
     /**
