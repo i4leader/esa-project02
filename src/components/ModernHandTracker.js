@@ -24,8 +24,8 @@ export class ModernHandTracker {
             right: []
         };
         
-        this.maxTrailLength = 25;
-        this.trailRetentionTime = 350;
+        this.maxTrailLength = 13; // 减少拖影长度，从25减少到15
+        this.trailRetentionTime = 230; // 大幅缩短拖影时间到150ms，避免拖影误切水果
     }
 
     /**

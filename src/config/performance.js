@@ -18,7 +18,7 @@ const PERFORMANCE_PRESETS = {
         targetFps: 30,
         enablePostProcessing: false,
         fruitSpawnRate: 0.3,
-        maxTrailLength: 15
+        maxTrailLength: 10 // 低端设备更短的拖影
     },
     [DEVICE_CAPABILITY.MEDIUM]: {
         gestureDetectionFps: 30,
@@ -26,7 +26,7 @@ const PERFORMANCE_PRESETS = {
         targetFps: 60,
         enablePostProcessing: true,
         fruitSpawnRate: 0.4,
-        maxTrailLength: 20
+        maxTrailLength: 15 // 中端设备适中的拖影
     },
     [DEVICE_CAPABILITY.HIGH]: {
         gestureDetectionFps: 60,
@@ -34,7 +34,7 @@ const PERFORMANCE_PRESETS = {
         targetFps: 60,
         enablePostProcessing: true,
         fruitSpawnRate: 0.5,
-        maxTrailLength: 25
+        maxTrailLength: 15 // 高端设备也使用较短拖影，确保精确切割
     }
 };
 
