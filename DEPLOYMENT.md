@@ -31,7 +31,7 @@ Verify `package.json` contains:
 {
   "dependencies": {
     "three": "^0.181.2",
-    "@mediapipe/tasks-vision": "^0.10.22",
+    "@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
     "postprocessing": "^6.38.0"
   }
 }

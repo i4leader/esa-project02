@@ -4,12 +4,12 @@ A gesture-controlled fruit cutting game using webcam hand tracking, built with T
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Three.js](https://img.shields.io/badge/Three.js-0.181.2-green.svg)
-![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.22-orange.svg)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.22--rc.20250304-orange.svg)
 
 ## ✨ What's New - v2.0 (Aliyun ESA Ready)
 
 ### 🚀 Major Improvements
-- **Modern MediaPipe**: Upgraded to `@mediapipe/tasks-vision` v0.10.22 for better reliability
+- **Modern MediaPipe**: Upgraded to `@mediapipe/tasks-vision` v0.10.22-rc.20250304 for better reliability
 - **Performance Optimization**: Device-adaptive configurations for smooth gameplay
 - **Enhanced Error Handling**: Better fallback mechanisms for production environments
 - **Fluorescent Trail Effects**: Beautiful neon-style hand tracking visuals
