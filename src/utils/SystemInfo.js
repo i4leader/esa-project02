@@ -61,26 +61,29 @@ export class SystemInfo {
      * 开始 FPS 监控
      */
     startFPSMonitoring() {
-        const updateFPS = () => {
-            this.frameCount++;
-            const currentTime = performance.now();
-            const deltaTime = currentTime - this.lastTime;
+        // FPS monitoring is now handled by the main game loop calling updateFPS()
+        // This ensures better performance and synchronization
+        console.log('SystemInfo: FPS monitoring initialized (called from main loop)');
+    }
 
-            if (deltaTime >= this.updateInterval) {
-                this.fps = Math.round((this.frameCount * 1000) / deltaTime);
-                this.frameCount = 0;
-                this.lastTime = currentTime;
+    /**
+     * Update FPS counter (called from main game loop)
+     */
+    updateFPS() {
+        this.frameCount++;
+        const currentTime = performance.now();
+        const deltaTime = currentTime - this.lastTime;
 
-                const fpsEl = document.getElementById('fps');
-                if (fpsEl) {
-                    fpsEl.textContent = `${this.fps} FPS`;
-                }
+        if (deltaTime >= this.updateInterval) {
+            this.fps = Math.round((this.frameCount * 1000) / deltaTime);
+            this.frameCount = 0;
+            this.lastTime = currentTime;
+
+            const fpsEl = document.getElementById('fps');
+            if (fpsEl) {
+                fpsEl.textContent = `${this.fps} FPS`;
             }
-
-            requestAnimationFrame(updateFPS);
-        };
-
-        updateFPS();
+        }
     }
 
     /**

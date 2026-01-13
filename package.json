@@ -19,10 +19,9 @@
   "author": "Jack Tu",
   "license": "MIT",
   "dependencies": {
-    "three": "^0.160.0",
-    "@mediapipe/hands": "^0.4.1675469240",
-    "@mediapipe/camera_utils": "^0.3.1675466862",
-    "@mediapipe/drawing_utils": "^0.3.1675466124"
+    "three": "^0.181.2",
+    "@mediapipe/tasks-vision": "^0.10.22",
+    "postprocessing": "^6.38.0"
   },
   "devDependencies": {
     "vite": "^5.0.0"

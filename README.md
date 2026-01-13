@@ -1,357 +1,228 @@
-# Fruit Ninja - Camera Gesture Controlled Game with Three.js + Mediapipe
+# 🍉 Fruit Ninja - Modern Hand Tracking Game
 
-[🇨🇳 中文版](#中文版) | [🇬🇧 English](#english-version)
+A gesture-controlled fruit cutting game using webcam hand tracking, built with Three.js and MediaPipe. **Now optimized for Aliyun ESA deployment!**
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Three.js](https://img.shields.io/badge/Three.js-0.181.2-green.svg)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.22-orange.svg)
+
+## ✨ What's New - v2.0 (Aliyun ESA Ready)
+
+### 🚀 Major Improvements
+- **Modern MediaPipe**: Upgraded to `@mediapipe/tasks-vision` v0.10.22 for better reliability
+- **Performance Optimization**: Device-adaptive configurations for smooth gameplay
+- **Enhanced Error Handling**: Better fallback mechanisms for production environments
+- **Fluorescent Trail Effects**: Beautiful neon-style hand tracking visuals
+- **Production-Ready**: Optimized specifically for Aliyun ESA deployment
+
+### 🔧 Technical Upgrades
+- **ModernHandTracker**: New architecture based on proven gesture-control patterns
+- **Performance Monitoring**: Real-time FPS and performance metrics (Press 'P')
+- **Adaptive Quality**: Automatically adjusts based on device capabilities
+- **Better Fallbacks**: Mouse/touch controls when camera fails
+
+## 🎮 Game Features
+
+### Hand Gesture Controls
+- **✋ Slice Fruits**: Move your hands to cut flying fruits
+- **🚫 Avoid Bombs**: Don't touch the black bombs!
+- **⏱️ Time Challenge**: 60 seconds to get the highest score
+- **🎯 Progressive Difficulty**: Spawn rate increases over time
+
+### Visual Effects
+- **🌈 Neon Trails**: Fluorescent hand tracking trails
+- **💥 Particle Effects**: Explosive fruit cutting animations
+- **🎨 3D Graphics**: Beautiful Three.js rendered fruits and effects
+- **📊 Real-time Stats**: System info and performance monitoring
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 16+
+- Modern browser (Chrome/Edge/Firefox recommended)
+- Webcam device
+- **HTTPS connection** (required for camera access)
+
+### Installation & Development
+```bash
+# Clone the repository
+git clone <repository-url>
+cd esa-project02
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+# Visit http://localhost:3000
+```
+
+### Production Build
+```bash
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 🌐 Aliyun ESA Deployment
+
+### Why It Now Works on Aliyun ESA
+1. **Modern MediaPipe**: Uses latest `@mediapipe/tasks-vision` instead of deprecated packages
+2. **CDN Reliability**: Multiple fallback CDN sources for model loading
+3. **HTTPS Ready**: Proper secure context handling for production
+4. **Error Recovery**: Graceful fallbacks when MediaPipe fails to load
+5. **Performance Adaptive**: Automatically adjusts to server environment
+
+### Deployment Configuration
+The project includes `esa.jsonc` configuration:
+```json
+{
+    "build": {
+        "command": "npm run build"
+    },
+    "assets": {
+        "directory": "dist"
+    },
+    "routes": [
+        {
+            "src": ".*",
+            "dest": "/index.html"
+        }
+    ]
+}
+```
+
+### Deployment Steps
+1. **Build the project**: `npm run build`
+2. **Upload to Aliyun ESA**: Upload the `dist/` folder
+3. **Configure HTTPS**: Ensure your domain uses HTTPS
+4. **Test camera access**: Use the built-in debug tools
+
+## 🎯 How to Play
+
+### Getting Started
+1. **Allow Camera Access**: Grant permission when prompted
+2. **Hand Positioning**: Hold your hands in front of the camera
+3. **Start Game**: Hover hand over "START GAME" button for 3 seconds
+4. **Slice Fruits**: Move your hands to cut flying fruits
+5. **Avoid Bombs**: Don't touch the black spheres!
+
+### Controls
+- **Hand Gestures**: Primary control method
+- **Mouse/Touch**: Fallback when camera unavailable
+- **SPACE**: Pause/Resume game
+- **P**: Toggle performance monitor
+
+### Scoring
+- **🍎 Fruits**: +10 points each
+- **💣 Bombs**: -20 points each
+- **⏱️ Time Bonus**: Higher scores for quick cuts
+
+## 🛠️ Technical Architecture
+
+### Modern Components
+```
+src/
+├── components/
+│   ├── ModernHandTracker.js    # New MediaPipe implementation
+│   ├── TrailRenderer.js        # Fluorescent trail effects
+│   ├── GameScene.js           # Three.js game logic
+│   └── ScoreSystem.js         # Game scoring
+├── config/
+│   └── performance.js         # Device-adaptive settings
+└── utils/
+    ├── SystemInfo.js          # Real-time system stats
+    └── AudioManager.js        # Sound effects
+```
+
+### Performance Optimization
+The game automatically detects device capabilities and adjusts:
+
+| Device Type | Detection FPS | Particles | Target FPS | Post-Processing |
+|-------------|---------------|-----------|------------|-----------------|
+| Low-end     | 20fps        | 15        | 30fps      | Disabled        |
+| Medium      | 30fps        | 25        | 60fps      | Enabled         |
+| High-end    | 60fps        | 30        | 60fps      | Full Quality    |
+
+## 🔧 Troubleshooting
+
+### Camera Issues
+**Problem**: Camera not working on Aliyun ESA
+**Solutions**:
+1. Ensure HTTPS is enabled on your domain
+2. Check browser permissions for camera access
+3. Try different browsers (Chrome recommended)
+4. Use the built-in camera debug tool
+5. Check browser console for detailed errors
+
+### Performance Issues
+**Problem**: Low FPS or stuttering
+**Solutions**:
+1. The game auto-adjusts quality based on device
+2. Press 'P' to view performance metrics
+3. Close other applications using GPU
+4. Try reducing browser window size
+
+### MediaPipe Loading Issues
+**Problem**: "MediaPipe initialization failed"
+**Solutions**:
+1. Check network connection
+2. Verify CDN access (jsdelivr.net, unpkg.com)
+3. Game will fallback to mouse/touch controls
+4. Refresh page to retry initialization
+
+## 🎨 Customization
+
+### Adjusting Performance
+Edit `src/config/performance.js` to modify:
+- Detection frame rates
+- Particle counts
+- Quality presets
+- Device capability thresholds
+
+### Visual Effects
+Modify `src/components/TrailRenderer.js` for:
+- Trail colors and effects
+- Glow intensity
+- Trail length and fade
+
+### Game Mechanics
+Update `src/components/GameScene.js` for:
+- Fruit spawn rates
+- Difficulty progression
+- Collision detection sensitivity
+
+## 📊 Performance Monitoring
+
+Press **P** during gameplay to view:
+- Real-time FPS
+- Frame time breakdown
+- Gesture detection performance
+- Game update timing
+- Render performance
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Related Projects
+
+- [gesture-control](../gesture-control) - The proven architecture this project is based on
+- [MediaPipe](https://ai.google.dev/edge/mediapipe) - Hand tracking technology
+- [Three.js](https://threejs.org/) - 3D graphics library
 
 ---
 
-# English Version
+⭐ **Now production-ready for Aliyun ESA!** ⭐
 
-## Project Overview
-
-This is a gesture-controlled fruit cutting game developed using Three.js and Mediapipe. Players use webcam-captured hand gestures to slice flying fruits on screen and earn points while avoiding bombs. The project runs in modern browsers and is deployed on Alibaba Cloud ESA platform for high availability and elastic scaling.
-
-## 🎮 Demo
-
-<p align="center">
-  <img src="/public/demofail.gif" alt="Fruit Ninja Demo" width="600">
-</p>
-
-## Features
-
-### 1. Core Game Features
-
-#### Camera Gesture Recognition
-- Uses Mediapipe to capture player hand movements in real-time, detecting both left and right hands
-- Both hands act as lightsabers, generating cutting paths through gesture trails to slice fruits or bombs
-
-#### Fruit & Bomb Logic
-- Randomly generates fruits (apples, watermelons, oranges, bananas, pineapples, etc.) and bombs
-- Fruits and bombs fly in from the top or sides with parabolic or linear trajectories
-- Slicing fruits creates particle explosion effects and adds points; slicing bombs triggers explosion effects and deducts points
-
-#### Scoring System
-- **Score Rules**:
-  - Slice fruit: +10 points
-  - Slice bomb: -20 points
-- **Real-time score display**: Score shown in top-right corner
-- **Dynamic difficulty**: Spawn rate and speed increase over time
-- **Game over conditions**: Score drops below 0, or 60 seconds elapsed
-
-### 2. Interface & Interaction
-
-#### Main Interface
-- **Top-left**: System info (resolution, FPS, browser, camera status)
-- **Top-right**: Real-time score and timer
-- **Center**: Game scene (fruits, bombs, hand trails)
-
-#### Start/Pause/End Screens
-- Game shows "Start Game" button - hold hand over button for 3 seconds to begin
-- Press SPACE to pause/resume during gameplay
-- Game over screen shows final score and "Play Again" button
-
-#### Gesture Trail Visualization
-- Hand gesture trails displayed as glowing lightsaber effects for enhanced feedback
-
-#### Sound Effects & Visual Effects
-- Cutting sound and particle explosion when slicing fruits
-- Explosion sound and screen shake when slicing bombs
-- Background music toggle support
-
-### 3. Tech Stack & Platform
-
-#### Core Technologies
-- **Three.js**: 3D scene rendering, animations, and particle systems
-- **Mediapipe**: Hand gesture recognition and tracking
-- **JavaScript/ES6+**: Game logic and interactions
-- **HTML5 + CSS3**: Game interface
-- **Vite**: Build tool and dev server
-
-#### Deployment
-- Deployed on Alibaba Cloud ESA (Edge Serverless Application) platform
-
-#### Browser Support
-- Modern browsers (Chrome, Edge, Firefox, Safari) latest versions
-- Optimized for 60FPS at 1080p resolution
-
-### 4. System Requirements
-
-#### Performance
-- Smooth gameplay at 60FPS
-- Hand tracking latency under 100ms
-
-#### Compatibility
-- Desktop and mobile devices supported
-- Touch gestures as fallback on mobile
-
-#### Security
-- Camera permission requires explicit user consent
-- HTTPS protocol for data transmission
-
-## Quick Start
-
-### 1. Prerequisites
-- Node.js >= 16.x installed
-
-### 2. Clone Repository
-```bash
-git clone https://github.com/i4leader/esa-project02
-cd esa-project02
-```
-
-### 3. Install Dependencies
-```bash
-npm install
-```
-
-### 4. Run Locally
-```bash
-npm run dev
-```
-
-Open browser and visit `http://localhost:3000`
-
-**Note**: First run requires camera permission.
-
-### 5. Build for Production
-```bash
-npm run build
-```
-
-Output will be in `dist` directory.
-
-## How to Play
-
-1. **Start Game**: Hold your hand over the "Start Game" button for 3 seconds
-2. **Slice Fruits**: Move your hand across the screen to slice flying fruits
-3. **Avoid Bombs**: Stay away from black bombs - slicing them costs points!
-4. **Pause Game**: Press SPACE to pause/resume
-5. **Audio Control**: Click the audio button in bottom-right to toggle music
-
-## License
-
-This project is open source under the MIT License.
-
-## Contributing
-
-Issues and Pull Requests are welcome!
-
----
-
-# 中文版
-
-## 项目简介
-
-这是一个使用 Three.js 和 Mediapipe 技术栈开发的基于摄像头手势交互的切水果游戏。玩家通过摄像头捕捉手势动作，在屏幕中切割飞出的水果以获得分数，同时避免切到炸弹。项目支持现代浏览器运行，并部署在阿里云 ESA 平台，确保高可用性和弹性扩展。
-
-## 🎮 游戏演示
-
-<p align="center">
-  <img src="/public/demofail.gif" alt="水果忍者演示" width="600">
-</p>
-
-## 功能概述
-
-### 1. 游戏核心功能
-
-#### 摄像头手势识别
-- 使用 Mediapipe 捕捉玩家的手部动作，实时识别左手和右手
-- 左手和右手均模拟为光剑，玩家通过手势轨迹生成切割路径，用于切割屏幕中的水果或炸弹
-
-#### 水果与炸弹逻辑
-- 随机生成水果（如苹果、西瓜、橙子、香蕉、菠萝等）和炸弹
-- 水果和炸弹以抛物线或直线轨迹从屏幕顶部或侧边飞入，未被切割时从屏幕下方飞出
-- 切割水果时，水果分裂为粒子效果并加分；切割炸弹时，触发爆炸特效并扣分
-
-#### 游戏计分系统
-- **得分规则**：
-  - 切割水果：+10 分
-  - 切割炸弹：-20 分
-- **实时分数显示**：分数信息显示在屏幕右上角
-- **游戏难度动态调整**：随游戏时间增加，水果和炸弹的生成速度、数量，以及飞行速度逐渐提升
-- **游戏结束条件**：玩家分数低于 0 时，或 60 秒时间结束，游戏结束
-
-### 2. 界面与交互
-
-#### 主界面
-- **左上角**：系统信息（分辨率、帧率、浏览器版本、摄像头状态）
-- **右上角**：实时分数
-- **中心区域**：游戏场景（水果、炸弹、手势轨迹等）
-
-#### 开始/暂停/结束界面
-- 游戏启动时显示"开始游戏"按钮，玩家的手在开始按钮上停顿 3 秒代表游戏开始
-- 游戏过程中按下空格键可暂停/继续游戏
-- 游戏结束后显示得分统计和"重新开始"按钮
-
-#### 手势轨迹可视化
-- 玩家手势轨迹在屏幕上以荧光轨迹线形式可视化，增强交互反馈
-
-#### 音效与特效
-- 切割水果时，播放切割音效并触发粒子爆炸特效
-- 切割炸弹时，播放爆炸音效并触发屏幕震动效果
-- 游戏背景音乐支持开关功能
-
-### 3. 技术栈与平台
-
-#### 核心技术栈
-- **Three.js**：实现 3D 场景渲染、动画效果和粒子系统
-- **Mediapipe**：实现手势识别和手部动作捕捉
-- **JavaScript/ES6+**：实现游戏逻辑和交互
-- **HTML5 + CSS3**：构建游戏界面
-- **Vite**：构建工具和开发服务器
-
-#### 部署平台
-- 部署到阿里云 ESA（Elastic Serverless Application）平台，支持高可用性和弹性扩展
-
-本项目由阿里云ESA提供加速、计算和保护
-<img src="/public/aliyun.png">
-
-#### 浏览器支持
-- 支持现代主流浏览器（Chrome、Edge、Firefox、Safari）最新版本
-- 优化性能以确保在 1080p 分辨率下达到 60FPS
-
-### 4. 系统需求
-
-#### 性能要求
-- 游戏运行流畅，帧率稳定在 60FPS
-- 摄像头手势识别延迟低于 100ms，确保实时响应
-
-#### 兼容性要求
-- 支持桌面端和移动端设备，优先优化桌面端体验
-- 在移动端设备上，支持触摸屏手势操作作为备用交互方式
-
-#### 安全性要求
-- 确保摄像头权限使用安全，用户需明确授权后方可启用摄像头
-- 数据传输使用 HTTPS 协议，防止信息泄露
-
-#### 可扩展性
-- 游戏代码结构清晰，支持后续新增功能（如新水果类型、新玩法模式等）
-- 游戏资源（如水果模型、音效）支持动态加载，便于更新
-
-## 项目结构
-
-```
-├── src
-│   ├── components            # 游戏核心组件
-│   │   ├── GameScene.js      # 游戏场景逻辑
-│   │   ├── HandTracking.js   # 手势识别逻辑
-│   │   └── ScoreSystem.js    # 计分系统
-│   ├── utils                 # 工具函数
-│   │   ├── AudioManager.js   # 音效管理器
-│   │   └── SystemInfo.js     # 系统信息管理器
-│   └── index.js              # 项目入口文件
-├── public
-│   ├── index.html            # HTML 文件
-│   ├── styles                # 样式文件
-│   │   └── main.css          # 主样式文件
-│   └── favicon.ico           # 网站图标
-├── README.md                 # 项目说明文档
-├── package.json              # 项目依赖配置
-├── vite.config.js            # Vite 配置文件
-└── .gitignore                # Git 忽略文件
-```
-
-## 快速开始
-
-### 1. 环境准备
-
-- 安装 Node.js（推荐版本 >= 16.x）
-- 注册阿里云账号，并开通 ESA 服务（可选，用于部署）
-
-### 2. 克隆项目
-
-```bash
-git clone https://github.com/i4leader/esa-project02
-cd esa-project02
-```
-
-### 3. 安装依赖
-
-```bash
-npm install
-```
-
-### 4. 本地运行
-
-```bash
-npm run dev
-```
-
-打开浏览器，访问 `http://localhost:3000` 查看效果。
-
-**注意**：首次运行需要允许浏览器访问摄像头权限。
-
-### 5. 构建生产版本
-
-```bash
-npm run build
-```
-
-构建产物将输出到 `dist` 目录。
-
-### 6. 部署到阿里云 ESA
-
-配置 `.env` 文件中的阿里云 ESA 部署信息，然后执行：
-
-```bash
-npm run deploy
-```
-
-## 游戏操作说明
-
-1. **开始游戏**：将手放在"开始游戏"按钮上停留 3 秒
-2. **切割水果**：使用手势在屏幕上移动，切割飞出的水果
-3. **避免炸弹**：注意避开黑色的炸弹，切割炸弹会扣分
-4. **暂停游戏**：按空格键暂停/继续游戏
-5. **音效控制**：点击右下角的音效按钮切换背景音乐
-
-## 项目开发计划
-
-### 阶段 1：需求分析与环境搭建 ✅
-- 明确功能需求与技术方案
-- 搭建阿里云 ESA 环境，配置部署流程
-
-### 阶段 2：功能开发 ✅
-- **基础功能**
-  - 集成 Mediapipe 实现手势识别
-  - 使用 Three.js 构建 3D 场景，加载水果模型和粒子效果
-  - 实现水果和炸弹的随机生成与运动轨迹
-  - 实现手势切割逻辑与分数计算
-- **界面与交互**
-  - 开发主界面、系统信息显示、分数显示
-  - 添加手势轨迹可视化和音效特效
-
-### 阶段 3：功能优化与扩展（计划中）
-- 引入更多水果类型、特殊道具和关卡模式
-- 支持 VR 设备，提升沉浸式游戏体验
-- 添加排行榜功能，显示玩家分数排名
-
-## 技术实现细节
-
-### 手势识别
-- 使用 Mediapipe Hands 模型进行实时手部追踪
-- 识别食指和中指指尖位置，计算光剑位置
-- 生成手势轨迹用于碰撞检测
-
-### 3D 场景渲染
-- 使用 Three.js 创建 3D 场景和相机
-- 实现水果和炸弹的物理运动（抛物线轨迹）
-- 使用粒子系统实现切割和爆炸特效
-
-### 碰撞检测
-- 将 3D 世界坐标转换为屏幕坐标
-- 使用点到线段距离算法检测切割碰撞
-- 实时更新切割路径进行碰撞检测
-
-## 许可证
-
-本项目基于 MIT License 开源，允许自由使用、修改和分发。
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
-## 联系方式
-
-如有问题或建议，请通过 GitHub Issues 联系。
-
-⭐ 如果这个项目对你有帮助，请给个 Star 支持一下！
+If you encounter any issues with deployment, check the troubleshooting section or open an issue with your browser console logs.

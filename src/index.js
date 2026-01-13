@@ -1,8 +1,10 @@
-import { HandTracking } from './components/HandTracking.js';
+import { ModernHandTracker } from './components/ModernHandTracker.js';
+import { TrailRenderer } from './components/TrailRenderer.js';
 import { GameScene } from './components/GameScene.js';
 import { ScoreSystem } from './components/ScoreSystem.js';
 import { AudioManager } from './utils/AudioManager.js';
 import { SystemInfo } from './utils/SystemInfo.js';
+import { getOptimalPerformanceConfig, applyPerformanceConfig, getCurrentPerformanceConfig, PerformanceMonitor } from './config/performance.js';
 
 /**
  * 游戏主类
@@ -10,6 +12,10 @@ import { SystemInfo } from './utils/SystemInfo.js';
  */
 class FruitCuttingGame {
     constructor() {
+        // Apply performance optimizations based on device capability
+        const perfConfig = getOptimalPerformanceConfig();
+        applyPerformanceConfig(perfConfig);
+        
         // DOM 元素
         this.videoElement = document.getElementById('video-input');
         this.canvasElement = document.getElementById('game-canvas');
@@ -26,12 +32,14 @@ class FruitCuttingGame {
         this.countdownEl = document.getElementById('countdown');
         this.musicToggleBtn = document.getElementById('music-toggle');
 
-        // 游戏组件
-        this.handTracking = null;
+        // 游戏组件 - Modern architecture
+        this.handTracker = new ModernHandTracker();
+        this.trailRenderer = new TrailRenderer(this.handCanvasElement);
         this.gameScene = null;
         this.scoreSystem = null;
         this.audioManager = null;
         this.systemInfo = null;
+        this.performanceMonitor = new PerformanceMonitor();
 
         // 游戏状态
         this.gameState = 'idle'; // idle, starting, playing, paused, gameover, restarting
@@ -41,6 +49,9 @@ class FruitCuttingGame {
         // 重新开始按钮状态
         this.restartCountdown = 0;
         this.restartCountdownTimer = null;
+
+        // Performance tracking
+        this.lastFrameTime = null;
 
         // 初始化
         this.init();
@@ -68,12 +79,8 @@ class FruitCuttingGame {
             this.showGameOver(data);
         };
 
-        // 初始化手势识别
-        this.handTracking = new HandTracking(
-            this.videoElement,
-            this.handCanvasElement,
-            (hands, trails) => this.onHandsDetected(hands, trails)
-        );
+        // 初始化手势识别 - Modern approach
+        // Note: handTracker is already initialized in constructor
 
         // 初始化游戏场景
         this.gameScene = new GameScene(
@@ -90,25 +97,33 @@ class FruitCuttingGame {
     }
 
     /**
-     * Initialize camera
+     * Initialize camera with modern error handling
      */
     async initializeCamera() {
         console.log('🎮 FruitCuttingGame: Starting camera initialization...');
         
         try {
-            const success = await this.handTracking.initialize();
-            console.log('🎮 FruitCuttingGame: HandTracking.initialize() returned:', success);
+            // Apply performance-based detection frequency
+            const perfConfig = getCurrentPerformanceConfig();
+            const detectionInterval = 1000 / perfConfig.gestureDetectionFps;
+            this.handTracker.setDetectionIntervalMs(detectionInterval);
+            
+            const success = await this.handTracker.initialize(this.videoElement);
+            console.log('🎮 FruitCuttingGame: HandTracker.initialize() returned:', success);
 
             if (success) {
                 this.systemInfo.updateCameraStatus('Connected');
                 console.log('🎮 FruitCuttingGame: Camera initialization SUCCESS');
+                
+                // Start the main game loop
+                this.startMainLoop();
             } else {
-                throw new Error('HandTracking initialization returned false');
+                throw new Error('HandTracker initialization returned false');
             }
         } catch (initError) {
             console.error('🎮 FruitCuttingGame: Camera initialization FAILED:', initError);
             
-            const errorMsg = this.handTracking.getLastError ? this.handTracking.getLastError() : initError.message;
+            const errorMsg = this.handTracker.getLastError() || initError.message;
             this.systemInfo.updateCameraStatus('Failed');
 
             console.error('Camera initialization failed on Aliyun ESA:', errorMsg);
@@ -136,7 +151,7 @@ class FruitCuttingGame {
                 userMessage += 'Camera is being used by another application. Please close other apps using the camera.';
             } else if (errorMsg.includes('HTTPS')) {
                 userMessage += 'This site requires HTTPS for camera access.';
-            } else if (errorMsg.includes('MediaPipe')) {
+            } else if (errorMsg.includes('MediaPipe') || errorMsg.includes('model')) {
                 userMessage += `MediaPipe initialization failed. This might be a CDN or network issue.\n\n` +
                     'The game will work with mouse/touch controls instead.';
             } else {
@@ -270,6 +285,12 @@ class FruitCuttingGame {
                 e.preventDefault();
                 this.togglePause();
             }
+            
+            // P键切换性能监控
+            if (e.code === 'KeyP') {
+                e.preventDefault();
+                this.performanceMonitor.toggle();
+            }
         });
 
         // 音乐切换按钮
@@ -289,21 +310,145 @@ class FruitCuttingGame {
     }
 
     /**
-     * 手部检测回调
+     * Start the main game loop
      */
-    onHandsDetected(hands, trails) {
-        // 更新切割路径
-        const cuttingPaths = this.handTracking.getCuttingPaths();
-        this.gameScene.updateCuttingPaths(cuttingPaths);
+    startMainLoop() {
+        this.animate();
+    }
 
-        // 检查开始按钮交互
-        if (this.gameState === 'idle' || this.gameState === 'starting') {
-            this.checkStartButtonInteraction(hands);
+    /**
+     * Main animation loop with performance monitoring
+     */
+    animate = () => {
+        const frameStart = this.performanceMonitor.startFrame();
+        requestAnimationFrame(this.animate);
+
+        // Update system info FPS
+        this.systemInfo.updateFPS();
+
+        // Gesture Detection with timing
+        const gestureStart = performance.now();
+        const result = this.handTracker.detectHands(performance.now());
+        this.performanceMonitor.recordGestureDetection(performance.now() - gestureStart);
+
+        // Process hand detection results
+        if (result && result.landmarks && result.landmarks.length > 0) {
+            this.onHandsDetected(result);
+        } else {
+            // No hands detected - clear trails
+            this.trailRenderer.clear();
+            
+            // Update game scene with empty cutting paths
+            this.gameScene.updateCuttingPaths([]);
         }
 
-        // 检查重新开始按钮交互
+        // Update trail rendering
+        const trails = this.handTracker.trails;
+        this.trailRenderer.drawTrails(trails);
+
+        // Performance monitoring
+        if (frameStart !== undefined) {
+            this.performanceMonitor.endFrame(frameStart);
+        }
+    }
+
+    /**
+     * Handle hand detection results
+     */
+    onHandsDetected(result) {
+        // Get cutting paths from hand tracker
+        const cuttingPaths = this.handTracker.getCuttingPaths();
+        this.gameScene.updateCuttingPaths(cuttingPaths);
+
+        // Check button interactions based on game state
+        if (this.gameState === 'idle' || this.gameState === 'starting') {
+            this.checkStartButtonInteraction();
+        }
+
         if (this.gameState === 'gameover' || this.gameState === 'restarting') {
-            this.checkRestartButtonInteraction(hands);
+            this.checkRestartButtonInteraction();
+        }
+    }
+
+    /**
+     * Check start button interaction using modern hand tracker
+     */
+    checkStartButtonInteraction() {
+        if (!this.startButton) return;
+
+        const rect = this.startButton.getBoundingClientRect();
+        const isHandOver = this.handTracker.isHandInArea(
+            rect.left,
+            rect.top,
+            rect.width,
+            rect.height
+        );
+
+        if (isHandOver) {
+            if (this.gameState === 'idle') {
+                this.gameState = 'starting';
+                this.startButton.classList.add('active');
+                this.startCountdown = 3;
+                this.updateCountdown();
+
+                this.startCountdownTimer = setInterval(() => {
+                    this.startCountdown--;
+                    this.updateCountdown();
+
+                    if (this.startCountdown <= 0) {
+                        clearInterval(this.startCountdownTimer);
+                        this.startGame();
+                    }
+                }, 1000);
+            }
+        } else {
+            if (this.gameState === 'starting') {
+                this.gameState = 'idle';
+                this.startButton.classList.remove('active');
+                this.countdownEl.textContent = '';
+                clearInterval(this.startCountdownTimer);
+            }
+        }
+    }
+
+    /**
+     * Check restart button interaction using modern hand tracker
+     */
+    checkRestartButtonInteraction() {
+        if (!this.restartButton) return;
+
+        const rect = this.restartButton.getBoundingClientRect();
+        const isHandOver = this.handTracker.isHandInArea(
+            rect.left,
+            rect.top,
+            rect.width,
+            rect.height
+        );
+
+        if (isHandOver) {
+            if (this.gameState === 'gameover') {
+                this.gameState = 'restarting';
+                this.restartButton.classList.add('active');
+                this.restartCountdown = 3;
+                this.updateRestartCountdown();
+
+                this.restartCountdownTimer = setInterval(() => {
+                    this.restartCountdown--;
+                    this.updateRestartCountdown();
+
+                    if (this.restartCountdown <= 0) {
+                        clearInterval(this.restartCountdownTimer);
+                        this.restartGame();
+                    }
+                }, 1000);
+            }
+        } else {
+            if (this.gameState === 'restarting') {
+                this.gameState = 'gameover';
+                this.restartButton.classList.remove('active');
+                this.clearRestartCountdown();
+                clearInterval(this.restartCountdownTimer);
+            }
         }
     }
 
@@ -378,47 +523,6 @@ class FruitCuttingGame {
     }
 
     /**
-     * 检查开始按钮交互
-     */
-    checkStartButtonInteraction(hands) {
-        if (!this.startButton) return;
-
-        const rect = this.startButton.getBoundingClientRect();
-        const isHandOver = this.handTracking.isHandInArea(
-            rect.left,
-            rect.top,
-            rect.width,
-            rect.height
-        );
-
-        if (isHandOver) {
-            if (this.gameState === 'idle') {
-                this.gameState = 'starting';
-                this.startButton.classList.add('active');
-                this.startCountdown = 3;
-                this.updateCountdown();
-
-                this.startCountdownTimer = setInterval(() => {
-                    this.startCountdown--;
-                    this.updateCountdown();
-
-                    if (this.startCountdown <= 0) {
-                        clearInterval(this.startCountdownTimer);
-                        this.startGame();
-                    }
-                }, 1000);
-            }
-        } else {
-            if (this.gameState === 'starting') {
-                this.gameState = 'idle';
-                this.startButton.classList.remove('active');
-                this.countdownEl.textContent = '';
-                clearInterval(this.startCountdownTimer);
-            }
-        }
-    }
-
-    /**
      * 更新倒计时显示
      */
     updateCountdown() {
@@ -431,41 +535,8 @@ class FruitCuttingGame {
      * 检查重新开始按钮交互
      */
     checkRestartButtonInteraction(hands) {
-        if (!this.restartButton) return;
-
-        const rect = this.restartButton.getBoundingClientRect();
-        const isHandOver = this.handTracking.isHandInArea(
-            rect.left,
-            rect.top,
-            rect.width,
-            rect.height
-        );
-
-        if (isHandOver) {
-            if (this.gameState === 'gameover') {
-                this.gameState = 'restarting';
-                this.restartButton.classList.add('active');
-                this.restartCountdown = 3;
-                this.updateRestartCountdown();
-
-                this.restartCountdownTimer = setInterval(() => {
-                    this.restartCountdown--;
-                    this.updateRestartCountdown();
-
-                    if (this.restartCountdown <= 0) {
-                        clearInterval(this.restartCountdownTimer);
-                        this.restartGame();
-                    }
-                }, 1000);
-            }
-        } else {
-            if (this.gameState === 'restarting') {
-                this.gameState = 'gameover';
-                this.restartButton.classList.remove('active');
-                this.clearRestartCountdown();
-                clearInterval(this.restartCountdownTimer);
-            }
-        }
+        // This method is now handled in the main class
+        // Keeping for compatibility but functionality moved to checkRestartButtonInteraction()
     }
 
     /**
