@@ -29,7 +29,7 @@ export class ModernHandTracker {
             left: [],
             right: []
         };
-        this.historyLength = 3; // 保存最近3帧用于平滑
+        this.historyLength = 5; // 保存最近3帧用于平滑
         
         this.maxTrailLength = 20; // 增加拖影长度，提高切割成功率
         this.trailRetentionTime = 250; // 适当增加拖影时间，平衡精确度和成功率
