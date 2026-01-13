@@ -37,6 +37,9 @@ A gesture-controlled fruit cutting game using webcam hand tracking, built with T
 - **🎨 3D Graphics**: Beautiful Three.js rendered fruits and effects
 - **📊 Real-time Stats**: System info and performance monitoring
 
+## Demo
+![Demo](/public/demo-project02.gif)
+
 ## 🚀 Quick Start
 
 ### Prerequisites
