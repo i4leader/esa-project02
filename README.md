@@ -6,6 +6,8 @@ A gesture-controlled fruit cutting game using webcam hand tracking, built with T
 ![Three.js](https://img.shields.io/badge/Three.js-0.181.2-green.svg)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.22--rc.20250304-orange.svg)
 
+**🌐 Language / 语言**: **English** | [中文](README_CN.md)
+
 ## ✨ What's New - v2.0 (Aliyun ESA Ready)
 
 ### 🚀 Major Improvements
